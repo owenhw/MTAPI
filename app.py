@@ -112,6 +112,24 @@ def by_location():
     data = mta.get_by_point(location, 5)
     return _make_envelope(data)
 
+@app.route('/by-location-relative-time', methods=['GET'])
+@response_wrapper
+def by_location_relative_time():
+    try:
+        location = (float(request.args['lat']), float(request.args['lon']))
+    except KeyError as e:
+        print(e)
+        resp = Response(
+            response=json.dumps({'error': 'Missing lat/lon parameter'}),
+            status=400,
+            mimetype="application/json"
+        )
+
+        return add_cors_header(resp)
+
+    data = mta.get_by_point_relative_time(location, 5)
+    return _make_envelope(data)
+
 @app.route('/by-route/<route>', methods=['GET'])
 @response_wrapper
 def by_route(route):

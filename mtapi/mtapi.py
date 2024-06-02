@@ -191,6 +191,36 @@ class Mtapi(object):
 
         return list(islice(serialized_stations, limit))
 
+
+    def get_by_point_relative_time(self, point, limit=5):
+        if self.is_expired():
+            self._update()
+
+        with self._read_lock:
+            sortable_stations = copy.deepcopy(self._stations).values()
+
+        sorted_stations = sorted(sortable_stations, key=lambda s: distance(s['location'], point))
+        serialized_stations = map(lambda s: s.serialize(), sorted_stations)
+        serialized_data = list(islice(serialized_stations, limit))
+        
+        d = serialized_data['data']
+        last_upated = datetime.fromtimestamp(serialized_data['updated'])
+        
+        parsed_data = {}
+
+        parsed_data['N'] = [item for sublist in [j['N'] for j in d] for item in sublist]
+        parsed_data['S'] = [item for sublist in [j['S'] for j in d] for item in sublist]
+
+        relative_time_data = {}
+
+        return parsed_data
+        #for k in parsed_data.keys():
+        #    relative_time_data[k] = 
+
+
+
+
+
     def get_routes(self):
         return self._routes.keys()
 
